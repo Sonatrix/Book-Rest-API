@@ -1,5 +1,6 @@
 import requests
 import time
+from datetime import datetime
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.http import JsonResponse
@@ -30,6 +31,9 @@ def external_api_view(request):
         params = {}
         params['name'] = request.GET.get('name')
 
+        if params['name'] is None:
+            params = {}
+
         while attempt_num < MAX_RETRIES:
             r = requests.get("https://www.anapioficeandfire.com/api/books", params=params, timeout=10)
             
@@ -42,7 +46,7 @@ def external_api_view(request):
                     'number_of_pages': obj.get("numberOfPages", None),
                     'publisher': obj.get("publisher", None),
                     'country': obj.get('country', None),
-                    'release_date': obj.get("released", None)
+                    'released_date': datetime.strptime(obj.get("released", None),"%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")
                 } for obj in data]
 
                 response_to_send = {
