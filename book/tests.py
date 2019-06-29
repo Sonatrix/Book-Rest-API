@@ -7,7 +7,7 @@ class BookTestCase(APITestCase):
     host = 'http://localhost:8000'
 
     def test_list_book(self):
-        url = self.host+'/api/v1/books/'
+        url = self.host+'/api/v1/books'
         response = self.client.get(url, format='json')
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(response.data.get("data", [])), 0)
