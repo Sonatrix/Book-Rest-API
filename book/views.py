@@ -6,17 +6,30 @@ from rest_framework.response import Response
 from django.http import JsonResponse, Http404
 from book.models import Book
 from book.serializers import BookSerializer
-from book.filters import BookFilter
 
 MAX_RETRIES = 5  # Arbitrary number of times we want to try
 
 # Book List define the view behavior.
 class BookListView(views.APIView):
     
+    def filter_queryset(self, queryset, params):
+        if params.get('name') is not None:
+            queryset = queryset.filter(name=params['name'])
+        
+        if params.get('publisher') is not None:
+            queryset = queryset.filter(publisher__name=params['publisher'])
+        
+        if params.get('country') is not None:
+            queryset = queryset.filter(country__name=params['country'])
+        
+        if params.get('release_date') is not None:
+            queryset = queryset.filter(release_date__year=params['release_date'])
+        
+        return queryset
+        
     def get(self, request):
-        filter_backends = (filters.SearchFilter,)
         queryset = Book.objects.all()
-        results = BookFilter(request.GET, queryset=queryset).queryset
+        results = self.filter_queryset(queryset, request.GET)
         serializer = BookSerializer(results, many=True)
         response = {
             'data': serializer.data,
@@ -187,7 +200,7 @@ def external_api_view(request):
             }
 
             return JsonResponse(response_to_send, status=status.HTTP_200_OK, safe=False)
-        
-        return JsonResponse({"message": "Request failed", "status_code": res.status_code, 'status': 'failed'}, status=res.status_code, safe=False)
+        else:
+            return JsonResponse({"message": "Request failed", "status_code": res.status_code, 'status': 'failed'}, status=res.status_code, safe=False)
 
     return JsonResponse({"message": "Method not allowed", "status_code": status.HTTP_400_BAD_REQUEST, 'status': 'failed'}, status=status.HTTP_400_BAD_REQUEST)
