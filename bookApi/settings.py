@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
+    'django_nose',
     'book'
 ]
 
@@ -133,3 +134,13 @@ REST_FRAMEWORK = {
 }
 
 APPEND_SLASH = False
+
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Tell nose to measure coverage on the 'foo' and 'bar' apps
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=book',
+    '--cover-html'
+]

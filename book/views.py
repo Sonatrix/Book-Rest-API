@@ -1,19 +1,16 @@
 import requests
 import time
 from datetime import datetime
-from django.http import Http404
-from rest_framework import viewsets, status, views
+from rest_framework import status, views
 from rest_framework.response import Response
-from django_filters import rest_framework as filters
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from book.models import Book, Author
+from django.http import JsonResponse, Http404
+from book.models import Book
 from book.serializers import BookSerializer
 from book.filters import BookFilter
 
 MAX_RETRIES = 5  # Arbitrary number of times we want to try
 
-# ViewSets define the view behavior.
+# Book List define the view behavior.
 class BookListView(views.APIView):
     def get(self, request):
         queryset = Book.objects.all()
@@ -26,7 +23,7 @@ class BookListView(views.APIView):
         }
         return Response(response, status=status.HTTP_200_OK)
     
-    def post(self, request, format=None):
+    def post(self, request):
 
         serializer = BookSerializer(data=request.data)
         print(request.data)
@@ -54,7 +51,7 @@ class BookView(views.APIView):
 
     def get(self, request, id):
         try:
-            queryset = Book.objects.get(pk=id)
+            queryset = self.get_object(pk=id)
             serializer = BookSerializer([queryset], many=True).data
             response = {
                 'data': serializer[0] if len(serializer)>0 else {},
@@ -65,7 +62,7 @@ class BookView(views.APIView):
         except Exception as ex:
              return Response({'status': 'failed', 'status_code': 204, 'status': 'failed', 'message': 'No Record found'}, status=status.HTTP_204_NO_CONTENT)
 
-    def patch(self, request, id, format=None):
+    def patch(self, request, id):
         """
            Update Book Details
         """
@@ -87,7 +84,7 @@ class BookView(views.APIView):
             return Response({'status': 'failed', 'status_code': 400, 'status': 'failed', 'message': 'Resource does not exist or not found'}, status=status.HTTP_400_BAD_REQUEST)
 
     
-    def delete(self, request, id, format=None):
+    def delete(self, request, id):
         """
            Method for deleting book with book id passed as param
         """
@@ -108,13 +105,16 @@ class BookView(views.APIView):
 
 # API for Delete and Update.
 class BookViewOperation(views.APIView):
+    """
+        API For update and delete using post method
+    """
     def get_object(self, id):
         try:
             return Book.objects.get(pk=id)
         except Book.DoesNotExist:
             raise Http404
     
-    def post(self, request, id, action, format=None):
+    def post(self, request, id, action):
         """
            Method for deleting book with book id passed as param based on action
         """
@@ -155,40 +155,37 @@ class BookViewOperation(views.APIView):
     
 
 def external_api_view(request):
+    """
+       Fetch External Books
+    """
     if request.method == "GET":
-        attempt_num = 0  # keep track of how many times we've retried
         params = {}
-        params['name'] = request.GET.get('name')
-
-        if params['name'] is None:
-            params = {}
-
-        while attempt_num < MAX_RETRIES:
-            r = requests.get("https://www.anapioficeandfire.com/api/books", params=params, timeout=10)
-            
-            if r.status_code == 200:
-                data = r.json()
-                filtered_res = [{
-                    'name': obj.get("name", None),
-                    'isbn': obj.get("isbn", None),
-                    'authors': obj.get('authors', None),
-                    'number_of_pages': obj.get("numberOfPages", None),
-                    'publisher': obj.get("publisher", None),
-                    'country': obj.get('country', None),
-                    'released_date': datetime.strptime(obj.get("released", None),"%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")
-                } for obj in data]
-
-                response_to_send = {
-                    'data': filtered_res,
-                    'status': 'success',
-                    'status_code': status.HTTP_200_OK
-                }
-                return JsonResponse(response_to_send, status=status.HTTP_200_OK, safe=False)
-            else:
-                attempt_num += 1
-                # You can probably use a logger to log the error here
-                time.sleep(5)  # Wait for 5 seconds before re-trying
         
-        return JsonResponse({"message": "Request failed", "status_code": r.status_code, 'status': 'failed'}, status=r.status_code, safe=False)
-    else:
-        return JsonResponse({"message": "Method not allowed", "status_code": r.HTTP_400_BAD_REQUEST, 'status': 'failed'}, status=status.HTTP_400_BAD_REQUEST)
+        if request.GET.get('name') is not None:
+            params['name'] = request.GET.get('name')
+
+        res = requests.get("https://www.anapioficeandfire.com/api/books", params=params, timeout=10)
+        
+        if res.status_code == 200:
+            data = res.json()
+            filtered_res = [{
+                'name': obj.get("name", None),
+                'isbn': obj.get("isbn", None),
+                'authors': obj.get('authors', None),
+                'number_of_pages': obj.get("numberOfPages", None),
+                'publisher': obj.get("publisher", None),
+                'country': obj.get('country', None),
+                'released_date': datetime.strptime(obj.get("released", None),"%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")
+            } for obj in data]
+
+            response_to_send = {
+                'data': filtered_res,
+                'status': 'success',
+                'status_code': status.HTTP_200_OK
+            }
+
+            return JsonResponse(response_to_send, status=status.HTTP_200_OK, safe=False)
+        
+        return JsonResponse({"message": "Request failed", "status_code": res.status_code, 'status': 'failed'}, status=res.status_code, safe=False)
+
+    return JsonResponse({"message": "Method not allowed", "status_code": status.HTTP_400_BAD_REQUEST, 'status': 'failed'}, status=status.HTTP_400_BAD_REQUEST)
