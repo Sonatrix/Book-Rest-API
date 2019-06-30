@@ -4,14 +4,23 @@ class Author(models.Model):
     """ Model representing book author details """
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
 class Publisher(models.Model):
     """ Model representing publisher detail """
     name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
 
 
 class Country(models.Model):
     """ Model representing country """
     name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
 
 class Book(models.Model):
     """Model representing a book."""
@@ -30,3 +39,6 @@ class Book(models.Model):
     
     created_at = models.DateField(null=True, blank=True, auto_now=True)
     release_date = models.DateField('Released Date', null=True, blank=True)
+
+    def __str__(self):
+        return self.name

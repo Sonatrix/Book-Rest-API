@@ -19,21 +19,35 @@ class TestCase(TestCase):
     def test_country_exists(self):
         """Country are correctly identified"""
         country = Country.objects.get(name="America")
-        self.assertEqual(country.name, 'America')
+        self.assertTrue(isinstance(country, Country))
+        self.assertEqual(country.__str__(), country.name)
+        self.assertTrue(isinstance(country.__str__, object))
+        self.assertEqual(country.name, "America")
     
     def test_author_exists(self):
         """Author are correctly identified"""
         author = Author.objects.get(name="Rajesh Mandal")
+        self.assertTrue(isinstance(author, Author))
+        self.assertEqual(author.__str__(), author.name)
         self.assertEqual(author.name, 'Rajesh Mandal')
     
     def test_publisher_exists(self):
         """Publisher are correctly identified"""
         publisher = Publisher.objects.get(name="Jai Publications")
+        self.assertTrue(isinstance(publisher, Publisher))
+        self.assertEqual(publisher.__str__(), publisher.name)
         self.assertEqual(publisher.name, 'Jai Publications')
     
     def test_create_book(self):
         """Book Creation are successfully done"""
         instance = Book.objects.get(name="Zeshashop")
-
-        
+        self.assertTrue(isinstance(instance, Book))
+        self.assertEqual(instance.__str__(), instance.name)
+        self.assertEqual(instance.name, 'Zeshashop')
         self.assertEqual(instance.isbn, '123-123456123')
+    
+    def test_if_book_no_exists(self):
+        """Test if book does not exist"""
+        instance = Book.objects.filter(id=3).exists()
+        
+        self.assertEqual(instance, False)
