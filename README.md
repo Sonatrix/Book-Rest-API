@@ -1,5 +1,14 @@
 # Book-Rest-API
 
+## Installation
+Install the requirements from requirements.txt
+```
+pip3 install -r requirements.txt
+
+RUN python3 manage.py migrate
+
+RUN python3 manage.py runserver
+```
 
 ## Call External API For Fetching Books data
 
