@@ -31,13 +31,6 @@ class TestCase(TestCase):
         self.assertEqual(author.__str__(), author.name)
         self.assertEqual(author.name, 'Rajesh Mandal')
     
-    def test_publisher_exists(self):
-        """Publisher are correctly identified"""
-        publisher = Publisher.objects.get(name="Jai Publications")
-        self.assertTrue(isinstance(publisher, Publisher))
-        self.assertEqual(publisher.__str__(), publisher.name)
-        self.assertEqual(publisher.name, 'Jai Publications')
-    
     def test_create_book(self):
         """Book Creation are successfully done"""
         instance = Book.objects.get(name="Zeshashop")

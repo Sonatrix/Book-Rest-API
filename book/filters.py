@@ -1,7 +1,7 @@
-import django_filters
+from django_filters import rest_framework as filters
 from book.models import Book
 
-class BookFilter(django_filters.FilterSet):
+class BookFilter(filters.FilterSet):
     class Meta:
         model = Book
         fields = {

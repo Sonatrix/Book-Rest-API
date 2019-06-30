@@ -1,7 +1,7 @@
 import requests
 import time
 from datetime import datetime
-from rest_framework import status, views
+from rest_framework import status, views, filters
 from rest_framework.response import Response
 from django.http import JsonResponse, Http404
 from book.models import Book
@@ -12,7 +12,9 @@ MAX_RETRIES = 5  # Arbitrary number of times we want to try
 
 # Book List define the view behavior.
 class BookListView(views.APIView):
+    
     def get(self, request):
+        filter_backends = (filters.SearchFilter,)
         queryset = Book.objects.all()
         results = BookFilter(request.GET, queryset=queryset).queryset
         serializer = BookSerializer(results, many=True)
@@ -26,7 +28,7 @@ class BookListView(views.APIView):
     def post(self, request):
 
         serializer = BookSerializer(data=request.data)
-        print(request.data)
+
         if serializer.is_valid():
             serializer.save()
             response = {
@@ -51,7 +53,7 @@ class BookView(views.APIView):
 
     def get(self, request, id):
         try:
-            queryset = self.get_object(pk=id)
+            queryset = self.get_object(id)
             serializer = BookSerializer([queryset], many=True).data
             response = {
                 'data': serializer[0] if len(serializer)>0 else {},
