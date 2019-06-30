@@ -132,3 +132,62 @@ GET http://localhost:8000/api/v1/books/16
     "status_code": 200
 }
 ```
+
+## Delete Book
+```
+DELETE http://localhost:8000/api/v1/books/:id
+
+POST http://localhost:8000/api/v1/books/:id/delete
+
+Request Body:
+None
+
+Response Body
+
+{
+    "data": [],
+    "status": "success",
+    "message": "The book My First Book was deleted successfully",
+    "status_code": 200
+}
+
+```
+
+## Update Book
+```
+URL: 
+PATCH http://localhost:8000/api/v1/books/:id
+
+http://localhost:8000/api/v1/books/:id/update
+```
+Request Body
+   {
+        "name": "Zeshashop",
+        "isbn": "123-123456123",
+        "authors":[{"name": "anjan"}, {"name": "Praveen"}],
+        "number_of_pages": 100,
+        "publisher": {"name": "Raj Publishers"},
+        "country": {"name": "America"},
+        "release_date": "2019-06-02"
+    }
+
+Response:
+{
+    "data": {
+        "id": 2,
+        "name": "Zeshashop",
+        "isbn": "123-123456123",
+        "authors": [
+            "anjan",
+            "Praveen"
+        ],
+        "number_of_pages": 100,
+        "publisher": "Raj Publishers",
+        "country": "America",
+        "release_date": "2019-06-02"
+    },
+    "status": "success",
+    "status_code": 200,
+    "message": "The Book Zeshashop was updated successfully"
+}
+```

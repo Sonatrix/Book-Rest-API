@@ -128,7 +128,8 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
-    )
+    ),
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler'
 }
 
 APPEND_SLASH = False

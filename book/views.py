@@ -65,24 +65,94 @@ class BookView(views.APIView):
         except Exception as ex:
              return Response({'status': 'failed', 'status_code': 204, 'status': 'failed', 'message': 'No Record found'}, status=status.HTTP_204_NO_CONTENT)
 
-    def put(self, request, pk, format=None):
-        book = self.get_object(pk)
-        serializer = BookSerializer(book, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            response = {
-                'data': [{'book': serializer.data}],
+    def patch(self, request, id, format=None):
+        """
+           Update Book Details
+        """
+        try:
+            book = self.get_object(id)
+            serializer = BookSerializer(book, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                response = {
+                    'data': serializer.data,
+                    'status': 'success',
+                    'status_code': status.HTTP_200_OK,
+                    'message': f'The Book {book.name} was updated successfully'
+                }
+                return Response(response, status=status.HTTP_200_OK)
+            else:
+                return Response({'status': 'failed', 'status_code': 400, 'status': 'failed', 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response({'status': 'failed', 'status_code': 400, 'status': 'failed', 'message': 'Resource does not exist or not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+    def delete(self, request, id, format=None):
+        """
+           Method for deleting book with book id passed as param
+        """
+        try:
+            book = self.get_object(id)
+            book_name = book.name
+            book.delete()
+            response_to_send = {
+                'data': [],
+                'status': 'success',
+                'message': f'The book {book_name} was deleted successfully',
+                'status_code': status.HTTP_200_OK
+            }
+            return Response(response_to_send, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({'status': 'failed', 'status_code': 400, 'status': 'failed', 'message': 'Resource does not exist or not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# API for Delete and Update.
+class BookViewOperation(views.APIView):
+    def get_object(self, id):
+        try:
+            return Book.objects.get(pk=id)
+        except Book.DoesNotExist:
+            raise Http404
+    
+    def post(self, request, id, action, format=None):
+        """
+           Method for deleting book with book id passed as param based on action
+        """
+        try:
+            book = self.get_object(id)
+            book_name = book.name
+            response_to_send = {
                 'status': 'success',
                 'status_code': status.HTTP_200_OK
             }
-            return Response(response, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def delete(self, request, id, format=None):
-        book = self.get_object(id)
-        book.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
+            if action == "delete":
+                book.delete()
+                response_to_send.update({
+                    'data': [],
+                    'message': f'The book {book_name} was deleted successfully'
+                })
+                return Response(response_to_send, status=status.HTTP_200_OK)
+            
+            elif action == "update":
+                serializer = BookSerializer(book, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    response_to_send.update({
+                        'data': serializer.data,
+                        'message': f'The Book {book_name} was updated successfully'
+                    })
+
+                    return Response(response_to_send, status=status.HTTP_200_OK)
+                else:
+                    return Response({'status': 'failed', 'status_code': 400, 'status': 'failed', 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'status': 'failed', 'status_code': 400, 'status': 'failed', 'message': 'Invalid Action'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as ex:
+            return Response({'status': 'failed', 'status_code': 400, 'status': 'failed', 'message': 'Resource does not exist or not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+    
 
 def external_api_view(request):
     if request.method == "GET":

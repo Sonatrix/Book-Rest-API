@@ -65,3 +65,35 @@ class BookSerializer(serializers.ModelSerializer):
         book.save()
 
         return book
+    
+    def update(self, instance, validated_data):
+        """
+           Update Book Details
+        """
+        authors = validated_data.pop('authors')
+        publisher = validated_data.pop('publisher')
+        country = validated_data.pop('country')
+
+        instance.name = validated_data.get('name', instance.name)
+        instance.isbn = validated_data.get('isbn', instance.isbn)
+        instance.release_date = validated_data.get('release_date', instance.release_date)
+        instance.number_of_pages = validated_data.get('number_of_pages', instance.number_of_pages)
+
+        authors_list = []
+
+        for author in authors:
+            author_obj, created = Author.objects.get_or_create(name=author["name"])
+            authors_list.append(author_obj)
+
+        instance.authors.set(authors_list)
+
+        # Update publisher create if not exists
+        publish_obj, created = Publisher.objects.get_or_create(name=publisher.get('name'))
+        instance.publisher = publish_obj
+        
+        # update country create if not exists
+        country_obj, created = Country.objects.get_or_create(name=country.get('name'))
+        instance.country = country_obj
+
+        instance.save()
+        return instance
