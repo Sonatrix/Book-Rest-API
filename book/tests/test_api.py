@@ -265,7 +265,7 @@ class BookTestCase(APITestCase):
         if response.get('status_code') == 201:
             get_url = self.host+'/api/v1/books/'+str(response['data'][0]['book']['id'])+'/patch'
             res = self.client.post(get_url, payload, format='json')
-            self.assertTrue(status.is_success(res.status_code))
+            self.assertTrue(status.is_client_error(res.status_code))
         else:
             pass
     
