@@ -10,6 +10,9 @@ RUN python3 manage.py migrate
 RUN python3 manage.py runserver
 ```
 
+## In Browser
+Open the api link in browser to see response and options
+
 ## Call External API For Fetching Books data
 
 ```
@@ -200,3 +203,5 @@ Response:
     "message": "The Book Zeshashop was updated successfully"
 }
 ```
+
+## Code Coverage
