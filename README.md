@@ -205,3 +205,5 @@ Response:
 ```
 
 ## Code Coverage
+
+RUN python3 manage.py test
