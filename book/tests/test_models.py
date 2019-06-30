@@ -3,18 +3,25 @@ from book.models import Country, Author, Publisher, Book
 
 class TestCase(TestCase):
     def setUp(self):
-        publisher = Publisher.objects.create(name="Jai Publications")
-        country = Country.objects.create(name="America")
-        author = Author.objects.create(name="Rajesh Mandal")
-        book = Book.objects.create(
+        self.publisher = Publisher.objects.create(name="Jai Publications")
+        self.country = Country.objects.create(name="America")
+        self.author = Author.objects.create(name="Rajesh Mandal")
+        self.book = Book.objects.create(
                 name = "Zeshashop",
                 isbn = "123-123456123",
                 number_of_pages = 100,
-                publisher = publisher,
-                country = country,
+                publisher = self.publisher,
+                country = self.country,
                 release_date = "2019-06-02"
             )
-        book.authors.set([author])
+        self.book.authors.set([self.author])
+
+    def tearDown(self):
+        self.book.delete()
+        self.publisher.delete()
+        self.author.delete()
+        self.country.delete()
+        
 
     def test_country_exists(self):
         """Country are correctly identified"""
@@ -22,7 +29,6 @@ class TestCase(TestCase):
         self.assertTrue(isinstance(country, Country))
         self.assertEqual(country.__str__(), country.name)
         self.assertTrue(isinstance(country.__str__, object))
-        self.assertEqual(country.name, "America")
     
     def test_author_exists(self):
         """Author are correctly identified"""

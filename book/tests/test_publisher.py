@@ -1,20 +1,29 @@
 from django.test import TestCase
+import nose.tools as nt
 from book.models import Publisher
 
 class PublisherTestCase(TestCase):
     def setUp(self):
-        Publisher.objects.create(name="Jai Publications")
+        self.publisher = Publisher.objects.create(name="Jai Publications")
+
+    def tearDown(self):
+        self.publisher.delete()
+
+    def test_publisher_created(self):
+        """Publisher are correctly identified"""
+        self.assertTrue(isinstance(self.publisher, Publisher))
+        nt.eq_(self.publisher.__str__(), self.publisher.name)
 
     def test_string_representation(self):
-        publisher = Publisher(name="jai")
-        self.assertEqual(str(publisher), publisher.name)
+        self.assertEqual(str(self.publisher), self.publisher.name)
     
     def test_verbose_name_plural(self):
-        self.assertEqual(str(Publisher._meta.verbose_name_plural), "publishers")
+        nt.eq_(str(Publisher._meta.verbose_name_plural), "publishers")
+    
+    def test_second_publisher_created(self):
+        publisher = Publisher.objects.create(name="Hannover")
+        self.assertNotEqual(self.publisher.name, publisher.name)
+        self.assertNotEqual(self.publisher.id, publisher.id)
+        publisher.delete()
 
-    def test_publisher_exists(self):
-        """Publisher are correctly identified"""
-        publisher = Publisher.objects.get(name="Jai Publications")
-        self.assertTrue(isinstance(publisher, Publisher))
-        self.assertEqual(publisher.__str__(), publisher.name)
-        self.assertEqual(publisher.name, 'Jai Publications')
+    

@@ -142,5 +142,6 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = [
     '--with-coverage',
     '--cover-package=book',
-    '--cover-html'
+    '--cover-html',
+    '--cover-inclusive'
 ]
