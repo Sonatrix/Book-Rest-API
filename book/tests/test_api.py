@@ -1,25 +1,50 @@
+import json
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from django.test import TestCase, Client
+from book.models import Country, Author, Publisher, Book
 
 class BookTestCase(APITestCase):
     client = APIClient()
+    app_client = Client()
     host = 'http://localhost:8000'
 
+    def setUp(self):
+        self.publisher = Publisher.objects.create(name="Jai Publications")
+        self.country = Country.objects.create(name="America")
+        self.author = Author.objects.create(name="Rajesh Mandal")
+        self.book = Book.objects.create(
+                name = "Zeshashop",
+                isbn = "123-123456123",
+                number_of_pages = 100,
+                publisher = self.publisher,
+                country = self.country,
+                release_date = "2019-06-02"
+            )
+        self.book.authors.set([self.author])
+
+    def tearDown(self):
+        self.book.delete()
+        self.publisher.delete()
+        self.author.delete()
+        self.country.delete()
     def test_list_book(self):
-        url = self.host+'/api/v1/books'
-        response = self.client.get(url, format='json')
+
+        url = reverse('book:books-view')
+        response = self.app_client.get(url)
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(response.data.get("data", [])), 0)
+        self.assertEqual(len(response.data.get("data", [])), 1)
     
     def test_external_api_zero_record(self):
-        url = self.host+'/api/external-books?name=a'
-        response = self.client.get(url, format='json')
+        url = reverse('book:external-books')
+        response = self.app_client.get(url, {'name': "a"})
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(response.get("data", [])), 0)
 
     def test_external_api_with_data(self):
-        url = f"{self.host}/api/external-books?name=A%20Game%20of%20Thrones"
-        response = self.client.get(url, format='json').json()
+        url = reverse('book:external-books')
+        response = self.app_client.get(url, {'name': "A Dance with Dragons"})
         self.assertEqual(len(response.get("data", [])), 1)
     
     def test_external_api_with_data(self):

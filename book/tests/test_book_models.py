@@ -1,6 +1,7 @@
 from django.test import TestCase
 from book.models import Country, Author, Publisher, Book
 
+
 class TestCase(TestCase):
     def setUp(self):
         self.publisher = Publisher.objects.create(name="Jai Publications")
@@ -22,7 +23,6 @@ class TestCase(TestCase):
         self.author.delete()
         self.country.delete()
         
-
     def test_country_exists(self):
         """Country are correctly identified"""
         country = Country.objects.get(name="America")

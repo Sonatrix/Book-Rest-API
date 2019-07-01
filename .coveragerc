@@ -1,5 +1,4 @@
 [report]
-exclude_lines =
-    def __str__
+
 [run]
     omit = book/migrations
