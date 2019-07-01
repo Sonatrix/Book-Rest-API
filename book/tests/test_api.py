@@ -36,22 +36,6 @@ class BookTestCase(APITestCase):
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(response.data.get("data", [])), 1)
     
-    def test_external_api_zero_record(self):
-        url = reverse('book:external-books')
-        response = self.app_client.get(url, {'name': "a"})
-        self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(response.get("data", [])), 0)
-
-    def test_external_api_with_data(self):
-        url = reverse('book:external-books')
-        response = self.app_client.get(url, {'name': "A Dance with Dragons"})
-        self.assertEqual(len(response.get("data", [])), 1)
-    
-    def test_external_api_with_data(self):
-        url = f"{self.host}/api/external-books?name=A%20Game%20of%20Thrones"
-        response = self.client.post(url, format='json')
-        self.assertTrue(status.is_client_error(response.status_code))
-
     def test_create_book(self):
         url = self.host+'/api/v1/books'
 
@@ -137,7 +121,7 @@ class BookTestCase(APITestCase):
     def test_filter_book_by_release_date(self):
         url = self.host+'/api/v1/books?release_date=2019'
         response = self.client.get(url, format='json').json()
-        self.assertEqual(len(response.get("data", [])), 0)
+        self.assertEqual(len(response.get("data", [])), 1)
     
     def test_update_book_data(self):
         url = self.host+'/api/v1/books/1'
@@ -148,7 +132,7 @@ class BookTestCase(APITestCase):
             "authors":[{"name": "Ranjan"}],
             "number_of_pages": 12364,
             "publisher":{"name": "Raju Publishers"},
-            "country": {"name": "UKS"},
+            "country": "UKS",
             "release_date": "2019-06-03"
         }
 
